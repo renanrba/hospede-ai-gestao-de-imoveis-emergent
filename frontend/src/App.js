@@ -1,53 +1,58 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import PropertiesPage from './pages/PropertiesPage';
+import TransactionsPage from './pages/TransactionsPage';
+import ReportsPage from './pages/ReportsPage';
+import Layout from './components/Layout';
+import { Toaster } from './components/ui/sonner';
+import './App.css';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true);
+    }
+    setIsLoading(false);
+  }, []);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setIsAuthenticated(false);
+  };
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-stone-100 flex items-center justify-center">Carregando...</div>;
+  }
+
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
+    <BrowserRouter>
+      <Toaster position="top-right" />
+      <Routes>
+        <Route path="/login" element={!isAuthenticated ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/" />} />
+        
+        {isAuthenticated ? (
+          <Route path="/" element={<Layout onLogout={handleLogout} />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="properties" element={<PropertiesPage />} />
+            <Route path="transactions" element={<TransactionsPage />} />
+            <Route path="reports" element={<ReportsPage />} />
           </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+        ) : (
+          <Route path="*" element={<Navigate to="/login" />} />
+        )}
+      </Routes>
+    </BrowserRouter>
   );
 }
 
