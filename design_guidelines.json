@@ -1,0 +1,142 @@
+{
+  "identity": {
+    "name": "The Architect's Ledger",
+    "archetype": "Swiss & Organic Hybrid",
+    "core_philosophy": "Precision meets Hospitality. A financial tool that feels like a well-designed home, not a spreadsheet.",
+    "vibe": "Clean, Technical, Warm, Trustworthy."
+  },
+  "typography": {
+    "headings": {
+      "family": "Manrope, sans-serif",
+      "weights": ["600", "800"],
+      "usage": "Page titles, Property names, Major metrics",
+      "letter_spacing": "-0.02em"
+    },
+    "body": {
+      "family": "Plus Jakarta Sans, sans-serif",
+      "weights": ["400", "500"],
+      "usage": "General text, labels, descriptions"
+    },
+    "mono": {
+      "family": "JetBrains Mono, monospace",
+      "weights": ["400", "500"],
+      "usage": "Financial values, dates, transaction IDs"
+    },
+    "installation": "Import from Google Fonts: https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap"
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "name": "Deep Emerald",
+        "hex": "#047857",
+        "tailwind": "bg-emerald-700 text-white"
+      },
+      "background": {
+        "name": "Warm Sand",
+        "hex": "#F5F5F4",
+        "tailwind": "bg-stone-100"
+      },
+      "surface": {
+        "name": "Paper White",
+        "hex": "#FFFFFF",
+        "tailwind": "bg-white"
+      },
+      "text": {
+        "primary": "#1C1917",
+        "secondary": "#57534E",
+        "tailwind_primary": "text-stone-900",
+        "tailwind_secondary": "text-stone-600"
+      },
+      "accents": {
+        "income": "#0D9488",
+        "expense": "#EA580C",
+        "tailwind_income": "text-teal-600",
+        "tailwind_expense": "text-orange-600"
+      }
+    },
+    "rules": [
+      "NO GRADIENTS. Use solid, flat colors.",
+      "Use 'Stone' grays instead of 'Slate' or 'Zinc' for a warmer feel.",
+      "Financial positives (Income) = Teal/Emerald. Negatives (Expenses) = Burnt Orange/Red."
+    ]
+  },
+  "layout": {
+    "grid_system": "Bento Grid (Asymmetrical)",
+    "container_style": "Grid Borders",
+    "spacing": "Generous. Use p-6 or p-8 for cards.",
+    "border_radius": "rounded-none or rounded-sm (max 4px). Keep it sharp and architectural.",
+    "shadows": "None or very subtle (shadow-sm). Rely on borders for separation."
+  },
+  "components": {
+    "cards": {
+      "style": "Flat white background, 1px border (border-stone-200), no shadow.",
+      "hover": "border-emerald-600 transition-colors duration-200"
+    },
+    "buttons": {
+      "primary": "bg-stone-900 text-white hover:bg-emerald-700 rounded-sm px-6 py-2 font-medium tracking-wide",
+      "secondary": "bg-white border border-stone-300 text-stone-900 hover:bg-stone-50 rounded-sm"
+    },
+    "charts": {
+      "library": "Recharts (via Shadcn)",
+      "style": "Minimalist. Remove grid lines if possible. Use palette colors.",
+      "config": {
+        "income": "#0D9488",
+        "expense": "#EA580C",
+        "energy": "#EAB308"
+      }
+    },
+    "navigation": {
+      "style": "Sidebar. Dark Stone (#1C1917) or Light Stone (#E7E5E4). High contrast active state."
+    }
+  },
+  "assets": {
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5px. Elegant and thin."
+    },
+    "images": {
+      "properties": [
+        {
+          "id": "flat_1",
+          "name": "Flat 101 - The Modernist",
+          "url": "https://images.unsplash.com/photo-1761864294727-3c9f6b3e7425?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "category": "Interior"
+        },
+        {
+          "id": "flat_2",
+          "name": "Flat 204 - Work Haven",
+          "url": "https://images.unsplash.com/photo-1737305467768-cfcbf106a535?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "category": "Interior"
+        },
+        {
+          "id": "flat_3",
+          "name": "Flat 305 - Cozy Retreat",
+          "url": "https://images.unsplash.com/photo-1737305457553-d6427adfdc8f?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "category": "Interior"
+        },
+        {
+          "id": "flat_4",
+          "name": "Flat 402 - Social Hub",
+          "url": "https://images.unsplash.com/photo-1737305457462-57fcd66ccee4?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "category": "Interior"
+        },
+        {
+          "id": "res_1",
+          "name": "Residential HQ",
+          "url": "https://images.unsplash.com/photo-1673977597041-7e6512719d16?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "category": "Exterior"
+        }
+      ]
+    }
+  },
+  "universal_guidelines": [
+    "DO NOT use 'Inter' font. Use the specified fonts.",
+    "DO NOT use rounded-xl or rounded-2xl. Keep it sharp (rounded-sm).",
+    "Use 'Stone' colors (warm gray) instead of 'Slate' (cool gray).",
+    "All financial data must be in Monospace font.",
+    "Use 'data-testid' on all interactive elements.",
+    "Create a 'Layout' component that wraps pages with the Sidebar.",
+    "Use 'sonner' for toast notifications."
+  ],
+  "instructions_to_main_agent": "You are building a dashboard. Focus on the 'Bento Grid' layout for the main dashboard. Use the 'Grid Borders' style for cards (1px border, no shadow). Implement the 5 properties using the provided images. Ensure the 'Commission' calculation (15%) is highlighted in the UI."
+}
