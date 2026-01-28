@@ -23,6 +23,44 @@ const Layout = ({ onLogout }) => {
     return location.pathname.startsWith(path);
   };
 
+  const handleBackup = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      // Buscar todos os dados
+      const [propertiesRes, transactionsRes] = await Promise.all([
+        axios.get(`${API}/properties`, config),
+        axios.get(`${API}/transactions`, config),
+      ]);
+
+      const backupData = {
+        user: user,
+        properties: propertiesRes.data,
+        transactions: transactionsRes.data,
+        backup_date: new Date().toISOString(),
+        version: '1.0'
+      };
+
+      // Criar arquivo JSON para download
+      const dataStr = JSON.stringify(backupData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `hospede-ai-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success('Backup criado com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao criar backup');
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-stone-100">
       <aside className="w-64 bg-stone-900 text-white flex flex-col">
