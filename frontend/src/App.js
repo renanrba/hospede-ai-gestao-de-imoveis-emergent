@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import PropertiesPage from './pages/PropertiesPage';
+import PropertyDetailsPage from './pages/PropertyDetailsPage';
 import TransactionsPage from './pages/TransactionsPage';
 import ReportsPage from './pages/ReportsPage';
 import Layout from './components/Layout';
