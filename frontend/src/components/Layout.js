@@ -1,6 +1,11 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Building2, ArrowLeftRight, BarChart3, LogOut } from 'lucide-react';
+import { Home, Building2, ArrowLeftRight, BarChart3, LogOut, Download } from 'lucide-react';
 import { Button } from './ui/button';
+import axios from 'axios';
+import { toast } from 'sonner';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const Layout = ({ onLogout }) => {
   const location = useLocation();
