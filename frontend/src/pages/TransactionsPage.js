@@ -63,13 +63,53 @@ const TransactionsPage = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API}/transactions`, {
-        ...formData,
-        amount: parseFloat(formData.amount),
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success('Lançamento adicionado com sucesso!');
+      
+      // Se for despesa e tiver múltiplas propriedades selecionadas
+      if (formData.type === 'expense' && selectedProperties.length > 0) {
+        const totalAmount = parseFloat(formData.amount);
+        let propertiesToProcess = [];
+        
+        if (splitType === 'equal') {
+          // Dividir igualmente
+          const amountPerProperty = totalAmount / selectedProperties.length;
+          propertiesToProcess = selectedProperties.map(propId => ({
+            property_id: propId,
+            amount: amountPerProperty
+          }));
+        } else {
+          // Valor total para cada propriedade
+          propertiesToProcess = selectedProperties.map(propId => ({
+            property_id: propId,
+            amount: totalAmount
+          }));
+        }
+        
+        // Criar uma transação para cada propriedade
+        await Promise.all(propertiesToProcess.map(prop => 
+          axios.post(`${API}/transactions`, {
+            property_id: prop.property_id,
+            type: formData.type,
+            category: formData.category,
+            amount: prop.amount,
+            description: formData.description + (splitType === 'equal' ? ' (Rateado)' : ''),
+            date: formData.date,
+          }, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        ));
+        
+        toast.success(`Despesa adicionada para ${propertiesToProcess.length} propriedade(s)!`);
+      } else {
+        // Transação única
+        await axios.post(`${API}/transactions`, {
+          ...formData,
+          amount: parseFloat(formData.amount),
+        }, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Lançamento adicionado com sucesso!');
+      }
+      
       setIsDialogOpen(false);
       setFormData({
         property_id: '',
@@ -77,8 +117,10 @@ const TransactionsPage = () => {
         category: '',
         amount: '',
         description: '',
-        date: new Date().toISOString().slice(0, 7),
+        date: '2025-12',
       });
+      setSelectedProperties([]);
+      setSplitType('full');
       fetchTransactions();
     } catch (error) {
       toast.error('Erro ao adicionar lançamento');
