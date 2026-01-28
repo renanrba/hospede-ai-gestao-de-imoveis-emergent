@@ -46,6 +46,7 @@ function App() {
           <Route path="/" element={<Layout onLogout={handleLogout} />}>
             <Route index element={<DashboardPage />} />
             <Route path="properties" element={<PropertiesPage />} />
+            <Route path="properties/:propertyId" element={<PropertyDetailsPage />} />
             <Route path="transactions" element={<TransactionsPage />} />
             <Route path="reports" element={<ReportsPage />} />
           </Route>
