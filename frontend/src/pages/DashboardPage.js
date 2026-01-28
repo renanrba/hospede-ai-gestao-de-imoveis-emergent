@@ -7,7 +7,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const DashboardPage = () => {
-  const [currentMonth, setCurrentMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [currentMonth, setCurrentMonth] = useState('2025-12');
   const [report, setReport] = useState(null);
   const [incomeData, setIncomeData] = useState([]);
   const [expensesData, setExpensesData] = useState([]);
