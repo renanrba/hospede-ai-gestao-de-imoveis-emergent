@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const EXPENSE_CATEGORIES = ['Limpeza', 'Manutenção', 'Água', 'Luz', 'Internet', 'Impostos', 'Condomínio'];
+const EXPENSE_CATEGORIES = ['Limpeza', 'Manutenção', 'Água', 'Luz', 'Internet', 'Impostos', 'Condomínio', 'Serviços'];
 
 const TransactionsPage = () => {
   const [properties, setProperties] = useState([]);
