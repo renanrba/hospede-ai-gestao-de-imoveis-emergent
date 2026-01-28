@@ -22,7 +22,7 @@ const Layout = ({ onLogout }) => {
     <div className="flex min-h-screen bg-stone-100">
       <aside className="w-64 bg-stone-900 text-white flex flex-col">
         <div className="p-6 border-b border-stone-700">
-          <h1 className="text-xl font-heading font-bold tracking-tight">The Architect's Ledger</h1>
+          <h1 className="text-xl font-heading font-bold tracking-tight">HOSPEDE.AI Dashboard</h1>
           <p className="text-sm text-stone-400 mt-1">{user.name}</p>
         </div>
         
