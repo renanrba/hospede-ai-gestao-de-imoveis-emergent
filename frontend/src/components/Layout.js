@@ -92,6 +92,15 @@ const Layout = ({ onLogout }) => {
 
         <div className="p-4 border-t border-stone-700">
           <Button
+            data-testid="backup-button"
+            onClick={handleBackup}
+            variant="ghost"
+            className="w-full justify-start text-stone-300 hover:text-white hover:bg-stone-800 mb-2"
+          >
+            <Download size={20} strokeWidth={1.5} className="mr-3" />
+            Backup Local
+          </Button>
+          <Button
             data-testid="logout-button"
             onClick={onLogout}
             variant="ghost"
