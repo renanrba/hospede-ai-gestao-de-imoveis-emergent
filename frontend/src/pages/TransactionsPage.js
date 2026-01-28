@@ -183,22 +183,12 @@ const TransactionsPage = () => {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="property">Propriedade</Label>
-                <Select value={formData.property_id} onValueChange={(value) => setFormData({ ...formData, property_id: value })}>
-                  <SelectTrigger data-testid="transaction-property-select" className="mt-1">
-                    <SelectValue placeholder="Selecione uma propriedade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {properties.map(prop => (
-                      <SelectItem key={prop.id} value={prop.id}>{prop.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
                 <Label htmlFor="type">Tipo</Label>
-                <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value, category: '' })}>
+                <Select value={formData.type} onValueChange={(value) => {
+                  setFormData({ ...formData, type: value, category: '' });
+                  setSelectedProperties([]);
+                  setSplitType('full');
+                }}>
                   <SelectTrigger data-testid="transaction-type-select" className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
@@ -208,6 +198,68 @@ const TransactionsPage = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {formData.type === 'expense' ? (
+                <>
+                  <div>
+                    <Label>Propriedades</Label>
+                    <p className="text-xs text-stone-500 mb-2">Selecione uma ou mais propriedades</p>
+                    <div className="space-y-2 max-h-48 overflow-y-auto border border-stone-200 rounded-sm p-3">
+                      {properties.map(prop => (
+                        <label key={prop.id} className="flex items-center gap-2 cursor-pointer hover:bg-stone-50 p-2 rounded">
+                          <input
+                            type="checkbox"
+                            checked={selectedProperties.includes(prop.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedProperties([...selectedProperties, prop.id]);
+                              } else {
+                                setSelectedProperties(selectedProperties.filter(id => id !== prop.id));
+                              }
+                            }}
+                            className="rounded border-stone-300"
+                          />
+                          <span className="text-sm text-stone-900">{prop.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {selectedProperties.length > 1 && (
+                    <div>
+                      <Label>Tipo de Rateio</Label>
+                      <Select value={splitType} onValueChange={setSplitType}>
+                        <SelectTrigger data-testid="split-type-select" className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="full">Valor Total para Cada</SelectItem>
+                          <SelectItem value="equal">Dividir Igualmente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {splitType === 'equal' && formData.amount && (
+                        <p className="text-xs text-stone-600 mt-1">
+                          Cada propriedade: R$ {(parseFloat(formData.amount) / selectedProperties.length).toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div>
+                  <Label htmlFor="property">Propriedade</Label>
+                  <Select value={formData.property_id} onValueChange={(value) => setFormData({ ...formData, property_id: value })}>
+                    <SelectTrigger data-testid="transaction-property-select" className="mt-1">
+                      <SelectValue placeholder="Selecione uma propriedade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {properties.map(prop => (
+                        <SelectItem key={prop.id} value={prop.id}>{prop.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {formData.type === 'expense' && (
                 <div>
@@ -268,7 +320,8 @@ const TransactionsPage = () => {
               <Button
                 data-testid="submit-transaction-button"
                 type="submit"
-                className="w-full bg-stone-900 hover:bg-emerald-700 text-white rounded-sm px-6 py-2 font-medium tracking-wide"
+                disabled={formData.type === 'expense' ? selectedProperties.length === 0 : !formData.property_id}
+                className="w-full bg-stone-900 hover:bg-emerald-700 text-white rounded-sm px-6 py-2 font-medium tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Adicionar
               </Button>
