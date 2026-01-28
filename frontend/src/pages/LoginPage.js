@@ -42,7 +42,7 @@ const LoginPage = ({ onLogin }) => {
       <div className="w-full max-w-md">
         <div className="bg-white border border-stone-200 rounded-sm p-8">
           <h1 className="text-3xl font-heading font-bold text-stone-900 mb-2">
-            The Architect's Ledger
+            HOSPEDE.AI Dashboard
           </h1>
           <p className="text-stone-600 mb-8">
             Gestão financeira para propriedades Airbnb
