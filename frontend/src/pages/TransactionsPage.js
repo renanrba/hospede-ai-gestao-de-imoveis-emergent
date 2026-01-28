@@ -19,13 +19,15 @@ const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('income');
+  const [selectedProperties, setSelectedProperties] = useState([]);
+  const [splitType, setSplitType] = useState('full'); // 'full', 'equal', 'custom'
   const [formData, setFormData] = useState({
     property_id: '',
     type: 'income',
     category: '',
     amount: '',
     description: '',
-    date: new Date().toISOString().slice(0, 7),
+    date: '2025-12',
   });
 
   useEffect(() => {
