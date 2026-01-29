@@ -65,8 +65,13 @@ const Layout = ({ onLogout }) => {
     <div className="flex min-h-screen bg-stone-100">
       <aside className="w-64 bg-stone-900 text-white flex flex-col">
         <div className="p-6 border-b border-stone-700">
-          <h1 className="text-xl font-heading font-bold tracking-tight">HOSPEDE.AI Dashboard</h1>
-          <p className="text-sm text-stone-400 mt-1">{user.name}</p>
+          <img 
+            src="https://customer-assets.emergentagent.com/job_rental-tracker-66/artifacts/8267tel7_ChatGPT%20Image%2024%20de%20ago.%20de%202025%2C%2015_53_53.png" 
+            alt="HOSPEDE.AI" 
+            className="w-full mb-3"
+          />
+          <h1 className="text-sm font-heading font-bold tracking-tight text-center">GESTÃO DE IMÓVEIS</h1>
+          <p className="text-xs text-stone-400 mt-2 text-center">{user.name}</p>
         </div>
         
         <nav className="flex-1 p-4">
