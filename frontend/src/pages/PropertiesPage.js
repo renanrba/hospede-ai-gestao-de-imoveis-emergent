@@ -24,6 +24,8 @@ const PropertiesPage = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProperty, setEditingProperty] = useState(null);
+  const [customImageUrl, setCustomImageUrl] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     type: 'airbnb',
