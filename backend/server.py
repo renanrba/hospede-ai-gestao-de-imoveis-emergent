@@ -195,6 +195,28 @@ async def delete_transaction(transaction_id: str, user_id: str = Depends(get_cur
         raise HTTPException(status_code=404, detail='Transaction not found')
     return {'message': 'Transaction deleted'}
 
+@api_router.put("/transactions/{transaction_id}", response_model=Transaction)
+async def update_transaction(transaction_id: str, trans_data: TransactionCreate, user_id: str = Depends(get_current_user)):
+    trans = Transaction(id=transaction_id, user_id=user_id, **trans_data.model_dump())
+    trans_dict = trans.model_dump()
+    trans_dict['created_at'] = trans_dict['created_at'].isoformat()
+    
+    result = await db.transactions.replace_one({'id': transaction_id, 'user_id': user_id}, trans_dict)
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail='Transaction not found')
+    return trans
+
+@api_router.put("/properties/{property_id}", response_model=Property)
+async def update_property(property_id: str, prop_data: PropertyCreate, user_id: str = Depends(get_current_user)):
+    prop = Property(id=property_id, user_id=user_id, **prop_data.model_dump())
+    prop_dict = prop.model_dump()
+    prop_dict['created_at'] = prop_dict['created_at'].isoformat()
+    
+    result = await db.properties.replace_one({'id': property_id, 'user_id': user_id}, prop_dict)
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail='Property not found')
+    return prop
+
 # Report routes
 @api_router.get("/reports/monthly")
 async def get_monthly_report(month: str, user_id: str = Depends(get_current_user)):
