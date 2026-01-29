@@ -277,6 +277,24 @@ async def get_energy_comparison(user_id: str = Depends(get_current_user)):
     
     return [{'month': k, 'energy': v} for k, v in sorted(monthly_energy.items())]
 
+@api_router.get("/reports/income-by-property")
+async def get_income_by_property(month: str, user_id: str = Depends(get_current_user)):
+    transactions = await db.transactions.find(
+        {'user_id': user_id, 'type': 'income', 'date': month}, 
+        {'_id': 0}
+    ).to_list(10000)
+    
+    properties = await db.properties.find({'user_id': user_id}, {'_id': 0}).to_list(100)
+    prop_map = {p['id']: p['name'] for p in properties}
+    
+    income_by_prop = {}
+    for t in transactions:
+        prop_id = t['property_id']
+        prop_name = prop_map.get(prop_id, 'Desconhecida')
+        income_by_prop[prop_name] = income_by_prop.get(prop_name, 0) + t['amount']
+    
+    return [{'property': k, 'income': v} for k, v in income_by_prop.items()]
+
 app.include_router(api_router)
 
 app.add_middleware(
