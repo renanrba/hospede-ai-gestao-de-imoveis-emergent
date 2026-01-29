@@ -41,10 +41,15 @@ const LoginPage = ({ onLogin }) => {
     <div className="min-h-screen bg-stone-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white border border-stone-200 rounded-sm p-8">
-          <h1 className="text-3xl font-heading font-bold text-stone-900 mb-2">
-            HOSPEDE.AI Dashboard
-          </h1>
-          <p className="text-stone-600 mb-8">
+          <div className="mb-6 text-center">
+            <img 
+              src="https://customer-assets.emergentagent.com/job_rental-tracker-66/artifacts/hs7qzcbs_Identidade%20-%20Hospede%20AI.png" 
+              alt="HOSPEDE.AI" 
+              className="w-48 mx-auto mb-3"
+            />
+            <h1 className="text-2xl font-heading font-bold text-stone-900">GESTÃO DE IMÓVEIS</h1>
+          </div>
+          <p className="text-stone-600 mb-8 text-center">
             Gestão financeira para propriedades Airbnb
           </p>
 
