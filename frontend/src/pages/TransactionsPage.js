@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown, Edit } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -20,7 +20,9 @@ const TransactionsPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('income');
   const [selectedProperties, setSelectedProperties] = useState([]);
-  const [splitType, setSplitType] = useState('full'); // 'full', 'equal', 'custom'
+  const [splitType, setSplitType] = useState('full');
+  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [filterMonth, setFilterMonth] = useState('all');
   const [formData, setFormData] = useState({
     property_id: '',
     type: 'income',
@@ -59,32 +61,55 @@ const TransactionsPage = () => {
     }
   };
 
+  const handleEdit = (transaction) => {
+    setEditingTransaction(transaction);
+    setFormData({
+      property_id: transaction.property_id,
+      type: transaction.type,
+      category: transaction.category || '',
+      amount: transaction.amount.toString(),
+      description: transaction.description || '',
+      date: transaction.date,
+    });
+    setIsDialogOpen(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
       
-      // Se for despesa e tiver múltiplas propriedades selecionadas
-      if (formData.type === 'expense' && selectedProperties.length > 0) {
+      if (editingTransaction) {
+        // Update existing transaction
+        await axios.put(`${API}/transactions/${editingTransaction.id}`, {
+          property_id: formData.property_id,
+          type: formData.type,
+          category: formData.category,
+          amount: parseFloat(formData.amount),
+          description: formData.description,
+          date: formData.date,
+        }, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.success('Lançamento atualizado com sucesso!');
+      } else if (formData.type === 'expense' && selectedProperties.length > 0) {
+        // Multiple properties
         const totalAmount = parseFloat(formData.amount);
         let propertiesToProcess = [];
         
         if (splitType === 'equal') {
-          // Dividir igualmente
           const amountPerProperty = totalAmount / selectedProperties.length;
           propertiesToProcess = selectedProperties.map(propId => ({
             property_id: propId,
             amount: amountPerProperty
           }));
         } else {
-          // Valor total para cada propriedade
           propertiesToProcess = selectedProperties.map(propId => ({
             property_id: propId,
             amount: totalAmount
           }));
         }
         
-        // Criar uma transação para cada propriedade
         await Promise.all(propertiesToProcess.map(prop => 
           axios.post(`${API}/transactions`, {
             property_id: prop.property_id,
@@ -100,7 +125,7 @@ const TransactionsPage = () => {
         
         toast.success(`Despesa adicionada para ${propertiesToProcess.length} propriedade(s)!`);
       } else {
-        // Transação única
+        // Single transaction
         await axios.post(`${API}/transactions`, {
           ...formData,
           amount: parseFloat(formData.amount),
@@ -111,6 +136,7 @@ const TransactionsPage = () => {
       }
       
       setIsDialogOpen(false);
+      setEditingTransaction(null);
       setFormData({
         property_id: '',
         type: 'income',
@@ -123,7 +149,7 @@ const TransactionsPage = () => {
       setSplitType('full');
       fetchTransactions();
     } catch (error) {
-      toast.error('Erro ao adicionar lançamento');
+      toast.error('Erro ao processar lançamento');
     }
   };
 
@@ -160,7 +186,23 @@ const TransactionsPage = () => {
     return property?.name || 'Desconhecida';
   };
 
-  const filteredTransactions = transactions.filter(t => t.type === activeTab);
+  const getAvailableMonths = () => {
+    const months = [...new Set(transactions.map(t => t.date))].sort().reverse();
+    return months;
+  };
+
+  const getFilteredTransactions = (type) => {
+    let filtered = transactions.filter(t => t.type === type);
+    if (filterMonth !== 'all') {
+      filtered = filtered.filter(t => t.date === filterMonth);
+    }
+    return filtered.sort((a, b) => b.date.localeCompare(a.date));
+  };
+
+  const calculateTotal = (type) => {
+    const filtered = getFilteredTransactions(type);
+    return filtered.reduce((sum, t) => sum + t.amount, 0);
+  };
 
   return (
     <div className="p-8">
@@ -170,7 +212,22 @@ const TransactionsPage = () => {
           <p className="text-stone-600">Registre receitas e despesas mensais</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setEditingTransaction(null);
+            setFormData({
+              property_id: '',
+              type: 'income',
+              category: '',
+              amount: '',
+              description: '',
+              date: '2025-12',
+            });
+            setSelectedProperties([]);
+            setSplitType('full');
+          }
+        }}>
           <DialogTrigger asChild>
             <Button data-testid="add-transaction-button" className="bg-stone-900 hover:bg-emerald-700 text-white rounded-sm px-6 py-2 font-medium tracking-wide">
               <Plus size={20} strokeWidth={1.5} className="mr-2" />
@@ -179,16 +236,20 @@ const TransactionsPage = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Novo Lançamento</DialogTitle>
+              <DialogTitle>{editingTransaction ? 'Editar Lançamento' : 'Novo Lançamento'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="type">Tipo</Label>
-                <Select value={formData.type} onValueChange={(value) => {
-                  setFormData({ ...formData, type: value, category: '' });
-                  setSelectedProperties([]);
-                  setSplitType('full');
-                }}>
+                <Select 
+                  value={formData.type} 
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, type: value, category: '' });
+                    setSelectedProperties([]);
+                    setSplitType('full');
+                  }}
+                  disabled={!!editingTransaction}
+                >
                   <SelectTrigger data-testid="transaction-type-select" className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
@@ -199,7 +260,7 @@ const TransactionsPage = () => {
                 </Select>
               </div>
 
-              {formData.type === 'expense' ? (
+              {formData.type === 'expense' && !editingTransaction ? (
                 <>
                   <div>
                     <Label>Propriedades</Label>
@@ -248,7 +309,11 @@ const TransactionsPage = () => {
               ) : (
                 <div>
                   <Label htmlFor="property">Propriedade</Label>
-                  <Select value={formData.property_id} onValueChange={(value) => setFormData({ ...formData, property_id: value })}>
+                  <Select 
+                    value={formData.property_id} 
+                    onValueChange={(value) => setFormData({ ...formData, property_id: value })}
+                    disabled={editingTransaction && formData.type === 'expense'}
+                  >
                     <SelectTrigger data-testid="transaction-property-select" className="mt-1">
                       <SelectValue placeholder="Selecione uma propriedade" />
                     </SelectTrigger>
@@ -320,14 +385,29 @@ const TransactionsPage = () => {
               <Button
                 data-testid="submit-transaction-button"
                 type="submit"
-                disabled={formData.type === 'expense' ? selectedProperties.length === 0 : !formData.property_id}
+                disabled={formData.type === 'expense' && !editingTransaction ? selectedProperties.length === 0 : !formData.property_id}
                 className="w-full bg-stone-900 hover:bg-emerald-700 text-white rounded-sm px-6 py-2 font-medium tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Adicionar
+                {editingTransaction ? 'Atualizar' : 'Adicionar'}
               </Button>
             </form>
           </DialogContent>
         </Dialog>
+      </div>
+
+      <div className="mb-6">
+        <Label>Filtrar por Mês</Label>
+        <Select value={filterMonth} onValueChange={setFilterMonth}>
+          <SelectTrigger data-testid="month-filter" className="mt-1 w-64">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Meses</SelectItem>
+            {getAvailableMonths().map(month => (
+              <SelectItem key={month} value={month}>{formatMonth(month)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -356,13 +436,22 @@ const TransactionsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTransactions.map((trans) => (
+                  {getFilteredTransactions('income').map((trans) => (
                     <tr key={trans.id} data-testid={`transaction-row-${trans.id}`} className="border-b border-stone-100 hover:bg-stone-50">
                       <td className="p-4 text-sm text-stone-600">{formatMonth(trans.date)}</td>
                       <td className="p-4 text-sm text-stone-900">{getPropertyName(trans.property_id)}</td>
                       <td className="p-4 text-sm text-stone-600">{trans.description || '-'}</td>
                       <td className="p-4 text-right font-mono font-medium text-teal-600">{formatCurrency(trans.amount)}</td>
                       <td className="p-4 text-right">
+                        <Button
+                          data-testid={`edit-transaction-${trans.id}`}
+                          onClick={() => handleEdit(trans)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 mr-2"
+                        >
+                          <Edit size={16} strokeWidth={1.5} />
+                        </Button>
                         <Button
                           data-testid={`delete-transaction-${trans.id}`}
                           onClick={() => handleDelete(trans.id)}
@@ -376,11 +465,18 @@ const TransactionsPage = () => {
                     </tr>
                   ))}
                 </tbody>
+                <tfoot className="border-t-2 border-stone-300 bg-stone-50">
+                  <tr>
+                    <td colSpan="3" className="p-4 text-right font-semibold text-stone-900">Total:</td>
+                    <td className="p-4 text-right font-mono font-bold text-teal-700 text-lg">{formatCurrency(calculateTotal('income'))}</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
-            {filteredTransactions.length === 0 && (
+            {getFilteredTransactions('income').length === 0 && (
               <div className="text-center py-12">
-                <p className="text-stone-600">Nenhuma receita registrada ainda.</p>
+                <p className="text-stone-600">Nenhuma receita registrada {filterMonth !== 'all' ? 'para este período' : 'ainda'}.</p>
               </div>
             )}
           </div>
@@ -401,7 +497,7 @@ const TransactionsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTransactions.map((trans) => (
+                  {getFilteredTransactions('expense').map((trans) => (
                     <tr key={trans.id} data-testid={`transaction-row-${trans.id}`} className="border-b border-stone-100 hover:bg-stone-50">
                       <td className="p-4 text-sm text-stone-600">{formatMonth(trans.date)}</td>
                       <td className="p-4 text-sm text-stone-900">{getPropertyName(trans.property_id)}</td>
@@ -413,6 +509,15 @@ const TransactionsPage = () => {
                       <td className="p-4 text-sm text-stone-600">{trans.description || '-'}</td>
                       <td className="p-4 text-right font-mono font-medium text-orange-600">{formatCurrency(trans.amount)}</td>
                       <td className="p-4 text-right">
+                        <Button
+                          data-testid={`edit-transaction-${trans.id}`}
+                          onClick={() => handleEdit(trans)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 mr-2"
+                        >
+                          <Edit size={16} strokeWidth={1.5} />
+                        </Button>
                         <Button
                           data-testid={`delete-transaction-${trans.id}`}
                           onClick={() => handleDelete(trans.id)}
@@ -426,11 +531,18 @@ const TransactionsPage = () => {
                     </tr>
                   ))}
                 </tbody>
+                <tfoot className="border-t-2 border-stone-300 bg-stone-50">
+                  <tr>
+                    <td colSpan="4" className="p-4 text-right font-semibold text-stone-900">Total:</td>
+                    <td className="p-4 text-right font-mono font-bold text-orange-700 text-lg">{formatCurrency(calculateTotal('expense'))}</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
-            {filteredTransactions.length === 0 && (
+            {getFilteredTransactions('expense').length === 0 && (
               <div className="text-center py-12">
-                <p className="text-stone-600">Nenhuma despesa registrada ainda.</p>
+                <p className="text-stone-600">Nenhuma despesa registrada {filterMonth !== 'all' ? 'para este período' : 'ainda'}.</p>
               </div>
             )}
           </div>
